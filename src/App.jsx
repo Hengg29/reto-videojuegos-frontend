@@ -196,7 +196,7 @@ function TarjetaJuego({ juego }) {
             src={juego.imagen_url}
             alt={`Portada de ${juego.titulo}`}
             loading="lazy"
-            className="h-full w-full object-contain transition-transform duration-300 motion-reduce:transition-none group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-300 motion-reduce:transition-none group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-slate-600">

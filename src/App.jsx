@@ -111,15 +111,12 @@ function App() {
           ))}
         </section>
 
-        {/* Destacados rápidos */}
-        <section className="mb-14 grid grid-cols-1 divide-y divide-neutral-800 border border-neutral-800 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-          <Destacado numero={juegos.length} texto="Juegos en el catálogo" />
-          <Destacado numero={generos.length} texto="Géneros disponibles" />
-          <Destacado
-            numero={juegosFiltrados.length}
-            texto={`Resultados en "${generoActivo === 'todos' ? 'Todos' : generoActivo}"`}
-          />
-        </section>
+        {/* Conteo de resultados */}
+        <p className="mb-8 text-center text-sm text-neutral-500">
+          {juegosFiltrados.length}{' '}
+          {juegosFiltrados.length === 1 ? 'resultado' : 'resultados'}
+          {generoActivo !== 'todos' && <> en «{generoActivo}»</>}
+        </p>
 
         {/* Grid de juegos */}
         {cargando ? (
@@ -282,18 +279,6 @@ function TarjetaSkeleton() {
         <div className="h-3 w-full rounded bg-neutral-900" />
         <div className="h-3 w-1/2 rounded bg-neutral-900" />
       </div>
-    </div>
-  )
-}
-
-// Bloque de estadística rápida
-function Destacado({ numero, texto }) {
-  return (
-    <div className="flex flex-col items-center justify-center gap-1 py-8 text-center">
-      <span className="font-heading text-2xl font-semibold text-white">
-        {numero}
-      </span>
-      <span className="text-sm text-neutral-500">{texto}</span>
     </div>
   )
 }

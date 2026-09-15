@@ -190,13 +190,13 @@ function FiltroPill({ activo, onClick, children }) {
 function TarjetaJuego({ juego }) {
   return (
     <article className="group cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition-all duration-200 motion-reduce:transition-none hover:-translate-y-1 hover:border-violet-500/50 hover:shadow-xl hover:shadow-violet-900/30">
-      <div className="aspect-video overflow-hidden bg-slate-800">
+      <div className="aspect-[3/4] overflow-hidden bg-slate-950">
         {juego.imagen_url ? (
           <img
             src={juego.imagen_url}
             alt={`Portada de ${juego.titulo}`}
             loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-300 motion-reduce:transition-none group-hover:scale-105"
+            className="h-full w-full object-contain transition-transform duration-300 motion-reduce:transition-none group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-slate-600">
@@ -237,7 +237,7 @@ function TarjetaSkeleton() {
       aria-hidden="true"
       className="animate-pulse overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]"
     >
-      <div className="aspect-video bg-white/5" />
+      <div className="aspect-[3/4] bg-white/5" />
       <div className="space-y-3 p-4">
         <div className="h-3 w-1/3 rounded bg-white/5" />
         <div className="h-4 w-3/4 rounded bg-white/5" />

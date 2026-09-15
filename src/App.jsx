@@ -130,7 +130,7 @@ function App() {
 
         {/* Grid de juegos */}
         {cargando ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4 xl:grid-cols-5">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: JUEGOS_POR_PAGINA }).map((_, i) => (
               <TarjetaSkeleton key={i} />
             ))}
@@ -140,7 +140,7 @@ function App() {
             No hay juegos para este filtro.
           </p>
         ) : (
-          <section className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4 xl:grid-cols-5">
+          <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {juegosVisibles.map((juego) => (
               <TarjetaJuego key={juego.id} juego={juego} />
             ))}

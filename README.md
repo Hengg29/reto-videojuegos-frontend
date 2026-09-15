@@ -34,12 +34,30 @@ completa del backend en el código.
 frontend/
 ├── index.html
 ├── vite.config.js
+├── public/
+│   └── images/           ← carátulas de los juegos
 └── src/
-    ├── main.jsx     ← punto de entrada de React
-    ├── App.jsx      ← componente principal
-    ├── App.css
-    └── index.css    ← Tailwind + fuentes + tokens de color
+    ├── main.jsx           ← punto de entrada de React
+    ├── App.jsx            ← estado, lógica y composición de la página
+    ├── index.css          ← Tailwind + fuentes + tokens de color
+    ├── hooks/
+    │   └── useEsMovil.js   ← detecta si la pantalla es de tamaño móvil
+    └── components/
+        ├── Header.jsx
+        ├── FiltroPill.jsx
+        ├── TarjetaJuego.jsx
+        ├── TarjetaSkeleton.jsx
+        ├── Paginacion.jsx
+        └── icons/
+            └── IconGamepad.jsx
 ```
+
+La idea de esta separación (igual que en el backend con `routes/`/
+`controllers/`): `App.jsx` se queda solo con el estado y la lógica
+(fetch, filtros, paginación), y cada pieza visual reutilizable vive en
+su propio archivo dentro de `components/`. Así, cuando agregues una
+nueva sección (login, detalle de un juego, etc.), creas su componente
+en esa carpeta en vez de seguir amontonando todo en un solo archivo.
 
 ## Diseño
 
@@ -51,6 +69,7 @@ frontend/
   para títulos, [Inter](https://fonts.google.com/specimen/Inter) para
   texto — cargadas desde Google Fonts en `src/index.css`.
 - **Imágenes**: las portadas de los juegos vienen del campo `imagen_url` en
-  la base de datos. Ahora mismo usan placeholders de `picsum.photos` —
-  reemplázalas actualizando ese campo en MySQL (o desde un futuro endpoint
-  de edición) con tus propias imágenes.
+  la base de datos. Las carátulas reales están guardadas en
+  `public/images/` (proporción 2:3) y la base de datos apunta a ellas
+  como `/images/archivo.webp`. Para agregar una nueva, guarda el archivo
+  ahí y actualiza `imagen_url` en MySQL con esa ruta.

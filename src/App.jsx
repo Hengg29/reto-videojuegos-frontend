@@ -1,28 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useEsMovil } from './hooks/useEsMovil'
+import { Header } from './components/Header'
+import { FiltroPill } from './components/FiltroPill'
+import { TarjetaJuego } from './components/TarjetaJuego'
+import { TarjetaSkeleton } from './components/TarjetaSkeleton'
+import { Paginacion } from './components/Paginacion'
 
 // En móvil el grid es de 1 columna, así que mostrar 15 implica mucho
 // scroll — ahí se muestran menos por página. En tablet/desktop (2-3
 // columnas) 15 se ve bien.
 const JUEGOS_POR_PAGINA_MOVIL = 8
 const JUEGOS_POR_PAGINA_DESKTOP = 15
-
-// Detecta si la pantalla es de tamaño "móvil" (menor al breakpoint sm
-// de Tailwind, 640px) y se actualiza si el usuario rota el teléfono o
-// cambia el tamaño de la ventana.
-function useEsMovil() {
-  const [esMovil, setEsMovil] = useState(
-    () => typeof window !== 'undefined' && window.innerWidth < 640
-  )
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 639px)')
-    const actualizar = (e) => setEsMovil(e.matches)
-    mediaQuery.addEventListener('change', actualizar)
-    return () => mediaQuery.removeEventListener('change', actualizar)
-  }, [])
-
-  return esMovil
-}
 
 function App() {
   const [juegos, setJuegos] = useState([])
@@ -36,6 +24,7 @@ function App() {
     ? JUEGOS_POR_PAGINA_MOVIL
     : JUEGOS_POR_PAGINA_DESKTOP
 
+  // Al cargar la página, traemos los juegos y los géneros desde el backend.
   useEffect(() => {
     Promise.all([
       fetch('/api/juegos').then((res) => res.json()),
@@ -64,13 +53,14 @@ function App() {
     paginaActual * juegosPorPagina
   )
 
-  // Al cambiar de categoría, o si cambia cuántos caben por página
-  // (ej. el usuario rota el teléfono), siempre volvemos a la página 1.
+  // Al cambiar de categoría, siempre volvemos a la página 1.
   const cambiarGenero = (genero) => {
     setGeneroActivo(genero)
     setPaginaActual(1)
   }
 
+  // Si cambia cuántos juegos caben por página (ej. el usuario rota el
+  // teléfono), también volvemos a la página 1.
   useEffect(() => {
     setPaginaActual(1)
   }, [juegosPorPagina])
@@ -83,23 +73,7 @@ function App() {
 
   return (
     <div className="flex min-h-screen flex-col bg-neutral-950 text-neutral-100">
-      {/* Header */}
-      <header className="sticky top-0 z-20 border-b border-neutral-800 bg-neutral-950">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
-          <div className="flex items-center gap-2">
-            <IconGamepad className="h-6 w-6 text-neutral-400" />
-            <span className="font-heading text-base font-semibold tracking-tight text-white">
-              GameVault
-            </span>
-          </div>
-          <button
-            type="button"
-            className="cursor-pointer rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-900 transition-colors duration-150 hover:bg-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
-          >
-            Iniciar sesión
-          </button>
-        </div>
-      </header>
+      <Header />
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-14 sm:px-6">
         {/* Hero */}
@@ -182,157 +156,6 @@ function App() {
         Reto Videojuegos — Turing IA
       </footer>
     </div>
-  )
-}
-
-// Controles de paginación: Anterior / números de página / Siguiente
-function Paginacion({ paginaActual, totalPaginas, onCambiarPagina }) {
-  const numeros = Array.from({ length: totalPaginas }, (_, i) => i + 1)
-
-  return (
-    <nav
-      aria-label="Paginación de resultados"
-      className="mt-12 flex items-center justify-center gap-1"
-    >
-      <button
-        type="button"
-        disabled={paginaActual === 1}
-        onClick={() => onCambiarPagina(paginaActual - 1)}
-        className="cursor-pointer rounded-md border border-neutral-800 px-3 py-2 text-sm text-neutral-300 transition-colors duration-150 hover:border-neutral-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-neutral-800"
-      >
-        Anterior
-      </button>
-
-      {numeros.map((n) => (
-        <button
-          key={n}
-          type="button"
-          aria-current={n === paginaActual ? 'page' : undefined}
-          onClick={() => onCambiarPagina(n)}
-          className={`h-9 w-9 cursor-pointer rounded-md text-sm transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-white ${
-            n === paginaActual
-              ? 'bg-white font-medium text-neutral-900'
-              : 'text-neutral-400 hover:text-white'
-          }`}
-        >
-          {n}
-        </button>
-      ))}
-
-      <button
-        type="button"
-        disabled={paginaActual === totalPaginas}
-        onClick={() => onCambiarPagina(paginaActual + 1)}
-        className="cursor-pointer rounded-md border border-neutral-800 px-3 py-2 text-sm text-neutral-300 transition-colors duration-150 hover:border-neutral-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-neutral-800"
-      >
-        Siguiente
-      </button>
-    </nav>
-  )
-}
-
-function FiltroPill({ activo, onClick, children }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={activo}
-      className={`cursor-pointer rounded-md px-3.5 py-1.5 text-sm transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-white ${
-        activo
-          ? 'bg-white font-medium text-neutral-900'
-          : 'border border-neutral-800 text-neutral-400 hover:border-neutral-600 hover:text-white'
-      }`}
-    >
-      {children}
-    </button>
-  )
-}
-
-function TarjetaJuego({ juego }) {
-  return (
-    <article className="group cursor-pointer overflow-hidden rounded-lg border border-neutral-800 transition-colors duration-150 hover:border-neutral-600">
-      <div className="relative aspect-2/3 overflow-hidden bg-neutral-900">
-        {juego.imagen_url ? (
-          <>
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 scale-110 bg-cover bg-center opacity-40 blur-2xl"
-              style={{ backgroundImage: `url(${juego.imagen_url})` }}
-            />
-            <img
-              src={juego.imagen_url}
-              alt={`Portada de ${juego.titulo}`}
-              loading="lazy"
-              className="relative h-full w-full object-contain"
-            />
-          </>
-        ) : (
-          <div className="flex h-full items-center justify-center text-neutral-700">
-            <IconGamepad className="h-10 w-10" />
-          </div>
-        )}
-      </div>
-      <div className="space-y-3 p-4">
-        <div className="flex items-center justify-between gap-2 text-xs text-neutral-500">
-          <span>{juego.genero}</span>
-          <span className="rounded border border-neutral-800 px-1.5 py-0.5">
-            {juego.clasificacion_codigo}
-          </span>
-        </div>
-        <h3 className="font-heading text-base font-medium leading-snug text-white">
-          {juego.titulo}
-        </h3>
-        <p className="line-clamp-2 text-sm text-neutral-500">
-          {juego.descripcion}
-        </p>
-        <div className="flex items-center justify-between border-t border-neutral-800 pt-3 text-sm">
-          <span className="text-neutral-500">{juego.desarrollador}</span>
-          <span className="font-heading font-semibold text-white">
-            ${juego.precio}
-          </span>
-        </div>
-      </div>
-    </article>
-  )
-}
-
-// Placeholder animado mientras cargan los juegos (evita "salto" de contenido)
-function TarjetaSkeleton() {
-  return (
-    <div
-      aria-hidden="true"
-      className="animate-pulse overflow-hidden rounded-lg border border-neutral-800"
-    >
-      <div className="aspect-2/3 bg-neutral-900" />
-      <div className="space-y-3 p-4">
-        <div className="h-3 w-1/3 rounded bg-neutral-900" />
-        <div className="h-4 w-3/4 rounded bg-neutral-900" />
-        <div className="h-3 w-full rounded bg-neutral-900" />
-        <div className="h-3 w-1/2 rounded bg-neutral-900" />
-      </div>
-    </div>
-  )
-}
-
-// ---- Icono SVG (sin dependencias externas) ----
-
-function IconGamepad({ className }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
-      <rect x="2" y="7" width="20" height="10" rx="5" />
-      <path d="M7 10v4M5 12h4" />
-      <circle cx="16" cy="10.5" r="1" fill="currentColor" stroke="none" />
-      <circle cx="18.5" cy="13" r="1" fill="currentColor" stroke="none" />
-    </svg>
   )
 }
 

@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 
-// Cuántas tarjetas se muestran al inicio, y cuántas se suman cada vez
-// que el usuario le da a "Cargar más".
-const JUEGOS_POR_PAGINA = 3
+// Cuántos juegos se muestran por página.
+const JUEGOS_POR_PAGINA = 15
 
 function App() {
   const [juegos, setJuegos] = useState([])
   const [generos, setGeneros] = useState([])
   const [generoActivo, setGeneroActivo] = useState('todos')
-  const [cantidadVisible, setCantidadVisible] = useState(JUEGOS_POR_PAGINA)
+  const [paginaActual, setPaginaActual] = useState(1)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
 
@@ -32,13 +31,25 @@ function App() {
     return juegos.filter((j) => j.genero === generoActivo)
   }, [juegos, generoActivo])
 
-  const juegosVisibles = juegosFiltrados.slice(0, cantidadVisible)
-  const hayMasPorMostrar = cantidadVisible < juegosFiltrados.length
+  const totalPaginas = Math.max(
+    1,
+    Math.ceil(juegosFiltrados.length / JUEGOS_POR_PAGINA)
+  )
+  const juegosVisibles = juegosFiltrados.slice(
+    (paginaActual - 1) * JUEGOS_POR_PAGINA,
+    paginaActual * JUEGOS_POR_PAGINA
+  )
 
-  // Al cambiar de categoría, reiniciamos cuántas tarjetas se muestran.
+  // Al cambiar de categoría, siempre volvemos a la página 1.
   const cambiarGenero = (genero) => {
     setGeneroActivo(genero)
-    setCantidadVisible(JUEGOS_POR_PAGINA)
+    setPaginaActual(1)
+  }
+
+  const irAPagina = (pagina) => {
+    setPaginaActual(pagina)
+    // Sube el scroll al inicio del catálogo al cambiar de página.
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (
@@ -131,7 +142,7 @@ function App() {
         {/* Grid de juegos */}
         {cargando ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: JUEGOS_POR_PAGINA }).map((_, i) => (
+            {Array.from({ length: 6 }).map((_, i) => (
               <TarjetaSkeleton key={i} />
             ))}
           </div>
@@ -147,17 +158,13 @@ function App() {
           </section>
         )}
 
-        {/* Cargar más */}
-        {hayMasPorMostrar && (
-          <div className="mt-10 flex justify-center">
-            <button
-              type="button"
-              onClick={() => setCantidadVisible((c) => c + JUEGOS_POR_PAGINA)}
-              className="cursor-pointer rounded-lg border border-violet-500/40 px-6 py-2.5 font-semibold text-slate-200 transition-colors duration-200 hover:bg-violet-500/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
-            >
-              Cargar más
-            </button>
-          </div>
+        {/* Paginación */}
+        {!cargando && totalPaginas > 1 && (
+          <Paginacion
+            paginaActual={paginaActual}
+            totalPaginas={totalPaginas}
+            onCambiarPagina={irAPagina}
+          />
         )}
       </main>
 
@@ -165,6 +172,53 @@ function App() {
         Reto Videojuegos — Turing IA
       </footer>
     </div>
+  )
+}
+
+// Controles de paginación: Anterior / números de página / Siguiente
+function Paginacion({ paginaActual, totalPaginas, onCambiarPagina }) {
+  // Genera la lista de números de página a mostrar (todas si son pocas).
+  const numeros = Array.from({ length: totalPaginas }, (_, i) => i + 1)
+
+  return (
+    <nav
+      aria-label="Paginación de resultados"
+      className="mt-10 flex items-center justify-center gap-2"
+    >
+      <button
+        type="button"
+        disabled={paginaActual === 1}
+        onClick={() => onCambiarPagina(paginaActual - 1)}
+        className="cursor-pointer rounded-lg border border-white/10 px-3 py-2 text-sm font-medium text-slate-300 transition-colors duration-200 hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
+      >
+        Anterior
+      </button>
+
+      {numeros.map((n) => (
+        <button
+          key={n}
+          type="button"
+          aria-current={n === paginaActual ? 'page' : undefined}
+          onClick={() => onCambiarPagina(n)}
+          className={`h-9 w-9 cursor-pointer rounded-lg text-sm font-semibold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 ${
+            n === paginaActual
+              ? 'bg-gradient-to-r from-violet-600 to-violet-500 text-white shadow-md shadow-violet-900/50'
+              : 'text-slate-300 hover:bg-white/5'
+          }`}
+        >
+          {n}
+        </button>
+      ))}
+
+      <button
+        type="button"
+        disabled={paginaActual === totalPaginas}
+        onClick={() => onCambiarPagina(paginaActual + 1)}
+        className="cursor-pointer rounded-lg border border-white/10 px-3 py-2 text-sm font-medium text-slate-300 transition-colors duration-200 hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
+      >
+        Siguiente
+      </button>
+    </nav>
   )
 }
 

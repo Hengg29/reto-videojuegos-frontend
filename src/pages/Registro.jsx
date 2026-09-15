@@ -4,10 +4,11 @@ import { IconGamepad } from '../components/icons/IconGamepad'
 import { LoginHero } from '../components/LoginHero'
 import { useAuth } from '../context/AuthContext'
 
-function Login() {
+function Registro() {
   const { login } = useAuth()
   const navigate = useNavigate()
 
+  const [nombre, setNombre] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
@@ -19,19 +20,19 @@ function Login() {
     setCargando(true)
 
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ nombre, email, password }),
       })
       const data = await res.json()
 
       if (!res.ok) {
-        // El backend manda { error: "..." } cuando algo sale mal
-        // (credenciales inválidas, faltan campos, etc.)
-        throw new Error(data.error || 'No se pudo iniciar sesión')
+        throw new Error(data.error || 'No se pudo crear la cuenta')
       }
 
+      // El registro ya devuelve token + usuario, igual que el login,
+      // así que dejamos al usuario logueado de una vez.
       login(data.usuario, data.token)
       navigate('/')
     } catch (err) {
@@ -66,10 +67,10 @@ function Login() {
             <div className="rounded-lg border border-neutral-800 p-8">
               <div className="mb-8 text-center">
                 <h1 className="font-heading text-2xl font-semibold tracking-tight text-white">
-                  Iniciar sesión
+                  Crear cuenta
                 </h1>
                 <p className="mt-2 text-sm text-neutral-400">
-                  Entra con tu cuenta para administrar el catálogo.
+                  Regístrate para guardar tus juegos favoritos.
                 </p>
               </div>
 
@@ -80,6 +81,26 @@ function Login() {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+                <div>
+                  <label
+                    htmlFor="nombre"
+                    className="mb-1.5 block text-sm text-neutral-300"
+                  >
+                    Nombre
+                  </label>
+                  <input
+                    id="nombre"
+                    name="nombre"
+                    type="text"
+                    autoComplete="name"
+                    required
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
+                    placeholder="Tu nombre"
+                    className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  />
+                </div>
+
                 <div>
                   <label
                     htmlFor="email"
@@ -101,29 +122,22 @@ function Login() {
                 </div>
 
                 <div>
-                  <div className="mb-1.5 flex items-center justify-between">
-                    <label
-                      htmlFor="password"
-                      className="block text-sm text-neutral-300"
-                    >
-                      Contraseña
-                    </label>
-                    <a
-                      href="#"
-                      className="text-xs text-neutral-500 transition-colors duration-150 hover:text-white"
-                    >
-                      ¿Olvidaste tu contraseña?
-                    </a>
-                  </div>
+                  <label
+                    htmlFor="password"
+                    className="mb-1.5 block text-sm text-neutral-300"
+                  >
+                    Contraseña
+                  </label>
                   <input
                     id="password"
                     name="password"
                     type="password"
-                    autoComplete="current-password"
+                    autoComplete="new-password"
                     required
+                    minLength={6}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
+                    placeholder="Mínimo 6 caracteres"
                     className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                   />
                 </div>
@@ -133,26 +147,18 @@ function Login() {
                   disabled={cargando}
                   className="w-full cursor-pointer rounded-md bg-white px-4 py-2.5 text-sm font-medium text-neutral-900 transition-colors duration-150 hover:bg-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {cargando ? 'Entrando...' : 'Iniciar sesión'}
+                  {cargando ? 'Creando cuenta...' : 'Crear cuenta'}
                 </button>
               </form>
             </div>
 
             <p className="mt-6 text-center text-sm text-neutral-500">
-              ¿No tienes cuenta?{' '}
+              ¿Ya tienes cuenta?{' '}
               <Link
-                to="/registro"
+                to="/login"
                 className="text-neutral-300 underline-offset-4 transition-colors duration-150 hover:text-white hover:underline"
               >
-                Regístrate
-              </Link>
-            </p>
-            <p className="mt-2 text-center text-sm text-neutral-500">
-              <Link
-                to="/"
-                className="text-neutral-300 underline-offset-4 transition-colors duration-150 hover:text-white hover:underline"
-              >
-                ← Volver al catálogo
+                Inicia sesión
               </Link>
             </p>
           </div>
@@ -162,4 +168,4 @@ function Login() {
   )
 }
 
-export default Login
+export default Registro

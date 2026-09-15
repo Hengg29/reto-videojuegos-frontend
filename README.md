@@ -43,13 +43,13 @@ frontend/
 
 ## Diseño
 
-- **Estilo**: catálogo tipo tienda de videojuegos (dark mode), inspirado en
-  Steam/Epic Games.
-- **Paleta**: violeta neón (`#7c3aed`) + acento rosa (`#f43f5e`) sobre fondo
-  oscuro (`#0f0f23`).
-- **Tipografía**: [Russo One](https://fonts.google.com/specimen/Russo+One)
-  para títulos, [Chakra Petch](https://fonts.google.com/specimen/Chakra+Petch)
-  para texto — cargadas desde Google Fonts en `src/index.css`.
+- **Estilo**: minimalista, dark mode, sin gradientes ni sombras de color —
+  bordes finos, tipografía como principal elemento visual.
+- **Paleta**: escala de grises (`neutral`) sobre fondo oscuro, con blanco
+  como único acento para estados activos/CTA.
+- **Tipografía**: [Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk)
+  para títulos, [Inter](https://fonts.google.com/specimen/Inter) para
+  texto — cargadas desde Google Fonts en `src/index.css`.
 - **Imágenes**: las portadas de los juegos vienen del campo `imagen_url` en
   la base de datos. Ahora mismo usan placeholders de `picsum.photos` —
   reemplázalas actualizando ese campo en MySQL (o desde un futuro endpoint

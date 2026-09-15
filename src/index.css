@@ -1,15 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&family=Russo+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 @import 'tailwindcss';
 
 @theme {
-  --font-heading: 'Russo One', sans-serif;
-  --font-body: 'Chakra Petch', sans-serif;
-
-  /* Paleta gaming: violeta neón + acento rosa */
-  --color-brand-primary: #7c3aed;
-  --color-brand-secondary: #a78bfa;
-  --color-brand-accent: #f43f5e;
-  --color-brand-bg: #0f0f23;
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
 }
 
 body {

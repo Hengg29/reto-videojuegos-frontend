@@ -53,53 +53,46 @@ function App() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#0f0f23] text-slate-100 selection:bg-violet-500/40">
+    <div className="flex min-h-screen flex-col bg-neutral-950 text-neutral-100">
       {/* Header */}
-      <header className="sticky top-0 z-20 border-b border-white/5 bg-[#0f0f23]/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
+      <header className="sticky top-0 z-20 border-b border-neutral-800 bg-neutral-950">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
           <div className="flex items-center gap-2">
-            <IconGamepad className="h-7 w-7 text-violet-400" />
-            <span className="font-heading text-lg tracking-wide text-white">
-              GAME<span className="text-violet-400">VAULT</span>
+            <IconGamepad className="h-6 w-6 text-neutral-400" />
+            <span className="font-heading text-base font-semibold tracking-tight text-white">
+              GameVault
             </span>
           </div>
           <button
             type="button"
-            className="cursor-pointer rounded-lg bg-gradient-to-r from-violet-600 to-rose-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-violet-900/40 transition-transform duration-200 hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f0f23]"
+            className="cursor-pointer rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-900 transition-colors duration-150 hover:bg-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
           >
             Iniciar sesión
           </button>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-12 sm:px-6">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-14 sm:px-6">
         {/* Hero */}
-        <section className="relative mb-12 overflow-hidden text-center">
-          {/* Glow decorativo de fondo */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute left-1/2 top-0 -z-10 h-64 w-[36rem] -translate-x-1/2 rounded-full bg-violet-600/20 blur-3xl"
-          />
-          <h1 className="font-heading text-3xl leading-tight text-white sm:text-5xl">
-            Explora el <span className="text-violet-400">catálogo</span> de
-            videojuegos
+        <section className="mb-14 text-center">
+          <h1 className="font-heading text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+            Catálogo de videojuegos
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-slate-400">
-            Filtra por género, descubre nuevos títulos y mira el detalle de
-            cada juego en tiempo real.
+          <p className="mx-auto mt-3 max-w-md text-neutral-400">
+            Filtra por género y descubre nuevos títulos.
           </p>
         </section>
 
         {/* Estado de error */}
         {error && (
-          <p className="mb-6 rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-center text-rose-400">
+          <p className="mb-6 rounded-md border border-neutral-800 bg-neutral-900 px-4 py-3 text-center text-neutral-300">
             {error}
           </p>
         )}
 
         {/* Filtros por género */}
         <section
-          className="mb-10 flex flex-wrap justify-center gap-2"
+          className="mb-12 flex flex-wrap justify-center gap-2"
           role="group"
           aria-label="Filtrar juegos por género"
         >
@@ -121,19 +114,10 @@ function App() {
         </section>
 
         {/* Destacados rápidos */}
-        <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <section className="mb-14 grid grid-cols-1 divide-y divide-neutral-800 border border-neutral-800 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          <Destacado numero={juegos.length} texto="Juegos en el catálogo" />
+          <Destacado numero={generos.length} texto="Géneros disponibles" />
           <Destacado
-            icon={<IconGamepad className="h-6 w-6" />}
-            numero={juegos.length}
-            texto="Juegos en el catálogo"
-          />
-          <Destacado
-            icon={<IconTag className="h-6 w-6" />}
-            numero={generos.length}
-            texto="Géneros disponibles"
-          />
-          <Destacado
-            icon={<IconFilter className="h-6 w-6" />}
             numero={juegosFiltrados.length}
             texto={`Resultados en "${generoActivo === 'todos' ? 'Todos' : generoActivo}"`}
           />
@@ -147,7 +131,7 @@ function App() {
             ))}
           </div>
         ) : juegosVisibles.length === 0 ? (
-          <p className="text-center text-slate-400">
+          <p className="text-center text-neutral-400">
             No hay juegos para este filtro.
           </p>
         ) : (
@@ -168,7 +152,7 @@ function App() {
         )}
       </main>
 
-      <footer className="border-t border-white/5 py-6 text-center text-sm text-slate-500">
+      <footer className="border-t border-neutral-800 py-6 text-center text-sm text-neutral-500">
         Reto Videojuegos — Turing IA
       </footer>
     </div>
@@ -177,19 +161,18 @@ function App() {
 
 // Controles de paginación: Anterior / números de página / Siguiente
 function Paginacion({ paginaActual, totalPaginas, onCambiarPagina }) {
-  // Genera la lista de números de página a mostrar (todas si son pocas).
   const numeros = Array.from({ length: totalPaginas }, (_, i) => i + 1)
 
   return (
     <nav
       aria-label="Paginación de resultados"
-      className="mt-10 flex items-center justify-center gap-2"
+      className="mt-12 flex items-center justify-center gap-1"
     >
       <button
         type="button"
         disabled={paginaActual === 1}
         onClick={() => onCambiarPagina(paginaActual - 1)}
-        className="cursor-pointer rounded-lg border border-white/10 px-3 py-2 text-sm font-medium text-slate-300 transition-colors duration-200 hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
+        className="cursor-pointer rounded-md border border-neutral-800 px-3 py-2 text-sm text-neutral-300 transition-colors duration-150 hover:border-neutral-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-neutral-800"
       >
         Anterior
       </button>
@@ -200,10 +183,10 @@ function Paginacion({ paginaActual, totalPaginas, onCambiarPagina }) {
           type="button"
           aria-current={n === paginaActual ? 'page' : undefined}
           onClick={() => onCambiarPagina(n)}
-          className={`h-9 w-9 cursor-pointer rounded-lg text-sm font-semibold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 ${
+          className={`h-9 w-9 cursor-pointer rounded-md text-sm transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-white ${
             n === paginaActual
-              ? 'bg-gradient-to-r from-violet-600 to-violet-500 text-white shadow-md shadow-violet-900/50'
-              : 'text-slate-300 hover:bg-white/5'
+              ? 'bg-white font-medium text-neutral-900'
+              : 'text-neutral-400 hover:text-white'
           }`}
         >
           {n}
@@ -214,7 +197,7 @@ function Paginacion({ paginaActual, totalPaginas, onCambiarPagina }) {
         type="button"
         disabled={paginaActual === totalPaginas}
         onClick={() => onCambiarPagina(paginaActual + 1)}
-        className="cursor-pointer rounded-lg border border-white/10 px-3 py-2 text-sm font-medium text-slate-300 transition-colors duration-200 hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
+        className="cursor-pointer rounded-md border border-neutral-800 px-3 py-2 text-sm text-neutral-300 transition-colors duration-150 hover:border-neutral-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-neutral-800"
       >
         Siguiente
       </button>
@@ -222,17 +205,17 @@ function Paginacion({ paginaActual, totalPaginas, onCambiarPagina }) {
   )
 }
 
-// Botón "pill" de filtro por género
+// Botón de filtro por género
 function FiltroPill({ activo, onClick, children }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={activo}
-      className={`cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 ${
+      className={`cursor-pointer rounded-md px-3.5 py-1.5 text-sm transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-white ${
         activo
-          ? 'bg-gradient-to-r from-violet-600 to-violet-500 text-white shadow-md shadow-violet-900/50'
-          : 'border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'
+          ? 'bg-white font-medium text-neutral-900'
+          : 'border border-neutral-800 text-neutral-400 hover:border-neutral-600 hover:text-white'
       }`}
     >
       {children}
@@ -243,47 +226,44 @@ function FiltroPill({ activo, onClick, children }) {
 // Tarjeta individual de un juego
 function TarjetaJuego({ juego }) {
   return (
-    <article className="group cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition-all duration-200 motion-reduce:transition-none hover:-translate-y-1 hover:border-violet-500/50 hover:shadow-xl hover:shadow-violet-900/30">
-      <div className="relative aspect-2/3 overflow-hidden bg-slate-950">
+    <article className="group cursor-pointer overflow-hidden rounded-lg border border-neutral-800 transition-colors duration-150 hover:border-neutral-600">
+      <div className="relative aspect-2/3 overflow-hidden bg-neutral-900">
         {juego.imagen_url ? (
           <>
-            {}
             <div
               aria-hidden="true"
-              className="absolute inset-0 scale-110 bg-cover bg-center opacity-60 blur-2xl"
+              className="absolute inset-0 scale-110 bg-cover bg-center opacity-40 blur-2xl"
               style={{ backgroundImage: `url(${juego.imagen_url})` }}
             />
             <img
               src={juego.imagen_url}
               alt={`Portada de ${juego.titulo}`}
               loading="lazy"
-              className="relative h-full w-full object-contain transition-transform duration-300 motion-reduce:transition-none group-hover:scale-105"
+              className="relative h-full w-full object-contain"
             />
           </>
         ) : (
-          <div className="flex h-full items-center justify-center text-slate-600">
+          <div className="flex h-full items-center justify-center text-neutral-700">
             <IconGamepad className="h-10 w-10" />
           </div>
         )}
       </div>
       <div className="space-y-3 p-4">
-        <div className="flex items-center justify-between gap-2">
-          <span className="rounded-full bg-violet-500/10 px-2.5 py-0.5 text-xs font-medium text-violet-300">
-            {juego.genero}
-          </span>
-          <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-xs font-medium text-slate-400">
+        <div className="flex items-center justify-between gap-2 text-xs text-neutral-500">
+          <span>{juego.genero}</span>
+          <span className="rounded border border-neutral-800 px-1.5 py-0.5">
             {juego.clasificacion_codigo}
           </span>
         </div>
-        <h3 className="font-heading text-base leading-snug text-white">
+        <h3 className="font-heading text-base font-medium leading-snug text-white">
           {juego.titulo}
         </h3>
-        <p className="line-clamp-2 text-sm text-slate-400">
+        <p className="line-clamp-2 text-sm text-neutral-500">
           {juego.descripcion}
         </p>
-        <div className="flex items-center justify-between border-t border-white/5 pt-3 text-sm">
-          <span className="text-slate-500">{juego.desarrollador}</span>
-          <span className="font-heading text-violet-300">
+        <div className="flex items-center justify-between border-t border-neutral-800 pt-3 text-sm">
+          <span className="text-neutral-500">{juego.desarrollador}</span>
+          <span className="font-heading font-semibold text-white">
             ${juego.precio}
           </span>
         </div>
@@ -297,31 +277,32 @@ function TarjetaSkeleton() {
   return (
     <div
       aria-hidden="true"
-      className="animate-pulse overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]"
+      className="animate-pulse overflow-hidden rounded-lg border border-neutral-800"
     >
-      <div className="aspect-2/3 bg-white/5" />
+      <div className="aspect-2/3 bg-neutral-900" />
       <div className="space-y-3 p-4">
-        <div className="h-3 w-1/3 rounded bg-white/5" />
-        <div className="h-4 w-3/4 rounded bg-white/5" />
-        <div className="h-3 w-full rounded bg-white/5" />
-        <div className="h-3 w-1/2 rounded bg-white/5" />
+        <div className="h-3 w-1/3 rounded bg-neutral-900" />
+        <div className="h-4 w-3/4 rounded bg-neutral-900" />
+        <div className="h-3 w-full rounded bg-neutral-900" />
+        <div className="h-3 w-1/2 rounded bg-neutral-900" />
       </div>
     </div>
   )
 }
 
 // Bloque de estadística rápida
-function Destacado({ icon, numero, texto }) {
+function Destacado({ numero, texto }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] py-7 text-center">
-      <span className="text-violet-400">{icon}</span>
-      <span className="font-heading text-2xl text-white">{numero}</span>
-      <span className="text-sm text-slate-400">{texto}</span>
+    <div className="flex flex-col items-center justify-center gap-1 py-8 text-center">
+      <span className="font-heading text-2xl font-semibold text-white">
+        {numero}
+      </span>
+      <span className="text-sm text-neutral-500">{texto}</span>
     </div>
   )
 }
 
-// ---- Iconos SVG (sin dependencias externas) ----
+// ---- Icono SVG (sin dependencias externas) ----
 
 function IconGamepad({ className }) {
   return (
@@ -339,41 +320,6 @@ function IconGamepad({ className }) {
       <path d="M7 10v4M5 12h4" />
       <circle cx="16" cy="10.5" r="1" fill="currentColor" stroke="none" />
       <circle cx="18.5" cy="13" r="1" fill="currentColor" stroke="none" />
-    </svg>
-  )
-}
-
-function IconTag({ className }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
-      <path d="M20.59 13.41 12 22l-9-9 8.59-8.59A2 2 0 0 1 13 4h6a1 1 0 0 1 1 1v6a2 2 0 0 1-.41 1.41Z" />
-      <circle cx="16.5" cy="7.5" r="1" fill="currentColor" stroke="none" />
-    </svg>
-  )
-}
-
-function IconFilter({ className }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
-      <path d="M4 5h16l-6 8v5l-4 2v-7z" />
     </svg>
   )
 }

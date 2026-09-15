@@ -37,11 +37,14 @@ frontend/
 ├── public/
 │   └── images/           ← carátulas de los juegos
 └── src/
-    ├── main.jsx           ← punto de entrada de React
-    ├── App.jsx            ← estado, lógica y composición de la página
+    ├── main.jsx           ← punto de entrada de React + BrowserRouter
+    ├── App.jsx            ← define las rutas (react-router-dom)
     ├── index.css          ← Tailwind + fuentes + tokens de color
     ├── hooks/
     │   └── useEsMovil.js   ← detecta si la pantalla es de tamaño móvil
+    ├── pages/
+    │   ├── Catalogo.jsx     ← ruta "/" — estado, lógica y catálogo
+    │   └── Login.jsx        ← ruta "/login" — formulario de acceso
     └── components/
         ├── Header.jsx
         ├── FiltroPill.jsx
@@ -53,11 +56,18 @@ frontend/
 ```
 
 La idea de esta separación (igual que en el backend con `routes/`/
-`controllers/`): `App.jsx` se queda solo con el estado y la lógica
-(fetch, filtros, paginación), y cada pieza visual reutilizable vive en
-su propio archivo dentro de `components/`. Así, cuando agregues una
-nueva sección (login, detalle de un juego, etc.), creas su componente
-en esa carpeta en vez de seguir amontonando todo en un solo archivo.
+`controllers/`): `pages/` tiene una vista completa por ruta (con su
+propio estado y lógica), y cada pieza visual reutilizable entre
+páginas vive en `components/`. Cuando agregues una nueva vista (ej. un
+panel de admin), creas su archivo en `pages/` y lo registras en
+`App.jsx`.
+
+> **Nota para cuando despliegues:** como se usa `react-router-dom` en
+> modo navegador (URLs "limpias" como `/login`), la plataforma donde
+> subas el sitio (Vercel, Netlify, etc.) necesita una regla de
+> "SPA fallback" que redirija cualquier ruta a `index.html`. Vercel y
+> Netlify lo detectan automático para proyectos de Vite; si usas otro
+> hosting y ves un 404 al entrar directo a `/login`, es por eso.
 
 ## Diseño
 

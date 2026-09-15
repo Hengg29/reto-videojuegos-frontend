@@ -1,8 +1,5 @@
 import { useEffect, useState } from 'react'
 
-// Detecta si la pantalla es de tamaño "móvil" (menor al breakpoint sm
-// de Tailwind, 640px) y se actualiza si el usuario rota el teléfono o
-// cambia el tamaño de la ventana.
 export function useEsMovil() {
   const [esMovil, setEsMovil] = useState(
     () => typeof window !== 'undefined' && window.innerWidth < 640

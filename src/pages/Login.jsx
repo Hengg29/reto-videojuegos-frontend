@@ -1,13 +1,44 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { IconGamepad } from '../components/icons/IconGamepad'
 import { LoginHero } from '../components/LoginHero'
+import { useAuth } from '../context/AuthContext'
 
 function Login() {
-  // Por ahora solo evitamos que el formulario recargue la página.
-  // La lógica real (validar, llamar a la API, guardar el token) se
-  // agrega después.
-  const handleSubmit = (e) => {
+  const { login } = useAuth()
+  const navigate = useNavigate()
+
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState(null)
+  const [cargando, setCargando] = useState(false)
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setError(null)
+    setCargando(true)
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        // El backend manda { error: "..." } cuando algo sale mal
+        // (credenciales inválidas, faltan campos, etc.)
+        throw new Error(data.error || 'No se pudo iniciar sesión')
+      }
+
+      login(data.usuario, data.token)
+      navigate('/')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setCargando(false)
+    }
   }
 
   return (
@@ -42,6 +73,12 @@ function Login() {
                 </p>
               </div>
 
+              {error && (
+                <p className="mb-5 rounded-md border border-red-900/50 bg-red-950/40 px-3 py-2 text-sm text-red-300">
+                  {error}
+                </p>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-5" noValidate>
                 <div>
                   <label
@@ -55,6 +92,9 @@ function Login() {
                     name="email"
                     type="email"
                     autoComplete="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="tu@correo.com"
                     className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                   />
@@ -80,6 +120,9 @@ function Login() {
                     name="password"
                     type="password"
                     autoComplete="current-password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                   />
@@ -87,9 +130,10 @@ function Login() {
 
                 <button
                   type="submit"
-                  className="w-full cursor-pointer rounded-md bg-white px-4 py-2.5 text-sm font-medium text-neutral-900 transition-colors duration-150 hover:bg-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
+                  disabled={cargando}
+                  className="w-full cursor-pointer rounded-md bg-white px-4 py-2.5 text-sm font-medium text-neutral-900 transition-colors duration-150 hover:bg-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Iniciar sesión
+                  {cargando ? 'Entrando...' : 'Iniciar sesión'}
                 </button>
               </form>
             </div>

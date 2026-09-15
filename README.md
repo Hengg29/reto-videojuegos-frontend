@@ -37,20 +37,23 @@ frontend/
 ├── public/
 │   └── images/           ← carátulas de los juegos
 └── src/
-    ├── main.jsx           ← punto de entrada de React + BrowserRouter
+    ├── main.jsx           ← punto de entrada: BrowserRouter + AuthProvider
     ├── App.jsx            ← define las rutas (react-router-dom)
     ├── index.css          ← Tailwind + fuentes + tokens de color
+    ├── context/
+    │   └── AuthContext.jsx ← sesión del usuario (login/logout, token)
     ├── hooks/
     │   └── useEsMovil.js   ← detecta si la pantalla es de tamaño móvil
     ├── pages/
     │   ├── Catalogo.jsx     ← ruta "/" — estado, lógica y catálogo
     │   └── Login.jsx        ← ruta "/login" — formulario de acceso
     └── components/
-        ├── Header.jsx
+        ├── Header.jsx        ← muestra "Iniciar sesión" o el usuario logueado
         ├── FiltroPill.jsx
         ├── TarjetaJuego.jsx
         ├── TarjetaSkeleton.jsx
         ├── Paginacion.jsx
+        ├── LoginHero.jsx     ← panel de marca del login (imagen + specs)
         └── icons/
             └── IconGamepad.jsx
 ```

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 
-// Cuántos juegos se muestran por página.
 const JUEGOS_POR_PAGINA = 15
 
 function App() {
@@ -11,7 +10,6 @@ function App() {
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
 
-  // Al cargar la página, traemos los juegos y los géneros desde el backend.
   useEffect(() => {
     Promise.all([
       fetch('/api/juegos').then((res) => res.json()),
@@ -205,7 +203,6 @@ function Paginacion({ paginaActual, totalPaginas, onCambiarPagina }) {
   )
 }
 
-// Botón de filtro por género
 function FiltroPill({ activo, onClick, children }) {
   return (
     <button
@@ -223,7 +220,6 @@ function FiltroPill({ activo, onClick, children }) {
   )
 }
 
-// Tarjeta individual de un juego
 function TarjetaJuego({ juego }) {
   return (
     <article className="group cursor-pointer overflow-hidden rounded-lg border border-neutral-800 transition-colors duration-150 hover:border-neutral-600">

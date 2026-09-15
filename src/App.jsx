@@ -190,14 +190,24 @@ function FiltroPill({ activo, onClick, children }) {
 function TarjetaJuego({ juego }) {
   return (
     <article className="group cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition-all duration-200 motion-reduce:transition-none hover:-translate-y-1 hover:border-violet-500/50 hover:shadow-xl hover:shadow-violet-900/30">
-      <div className="aspect-2/3 overflow-hidden bg-slate-950">
+      <div className="relative aspect-2/3 overflow-hidden bg-slate-950">
         {juego.imagen_url ? (
-          <img
-            src={juego.imagen_url}
-            alt={`Portada de ${juego.titulo}`}
-            loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-300 motion-reduce:transition-none group-hover:scale-105"
-          />
+          <>
+            {/* Fondo desenfocado con la misma imagen, para rellenar la
+                tarjeta sin recortar la carátula real (técnica tipo
+                Spotify/Apple Music). */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 scale-110 bg-cover bg-center opacity-60 blur-2xl"
+              style={{ backgroundImage: `url(${juego.imagen_url})` }}
+            />
+            <img
+              src={juego.imagen_url}
+              alt={`Portada de ${juego.titulo}`}
+              loading="lazy"
+              className="relative h-full w-full object-contain transition-transform duration-300 motion-reduce:transition-none group-hover:scale-105"
+            />
+          </>
         ) : (
           <div className="flex h-full items-center justify-center text-slate-600">
             <IconGamepad className="h-10 w-10" />

@@ -38,5 +38,19 @@ frontend/
     ├── main.jsx     ← punto de entrada de React
     ├── App.jsx      ← componente principal
     ├── App.css
-    └── index.css
+    └── index.css    ← Tailwind + fuentes + tokens de color
 ```
+
+## Diseño
+
+- **Estilo**: catálogo tipo tienda de videojuegos (dark mode), inspirado en
+  Steam/Epic Games.
+- **Paleta**: violeta neón (`#7c3aed`) + acento rosa (`#f43f5e`) sobre fondo
+  oscuro (`#0f0f23`).
+- **Tipografía**: [Russo One](https://fonts.google.com/specimen/Russo+One)
+  para títulos, [Chakra Petch](https://fonts.google.com/specimen/Chakra+Petch)
+  para texto — cargadas desde Google Fonts en `src/index.css`.
+- **Imágenes**: las portadas de los juegos vienen del campo `imagen_url` en
+  la base de datos. Ahora mismo usan placeholders de `picsum.photos` —
+  reemplázalas actualizando ese campo en MySQL (o desde un futuro endpoint
+  de edición) con tus propias imágenes.

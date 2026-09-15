@@ -53,7 +53,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0f23] text-slate-100 selection:bg-violet-500/40">
+    <div className="flex min-h-screen flex-col bg-[#0f0f23] text-slate-100 selection:bg-violet-500/40">
       {/* Header */}
       <header className="sticky top-0 z-20 border-b border-white/5 bg-[#0f0f23]/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
@@ -72,7 +72,7 @@ function App() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-12 sm:px-6">
         {/* Hero */}
         <section className="relative mb-12 overflow-hidden text-center">
           {/* Glow decorativo de fondo */}

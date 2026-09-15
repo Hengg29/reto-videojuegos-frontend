@@ -1,6 +1,28 @@
 import { useEffect, useMemo, useState } from 'react'
 
-const JUEGOS_POR_PAGINA = 15
+// En móvil el grid es de 1 columna, así que mostrar 15 implica mucho
+// scroll — ahí se muestran menos por página. En tablet/desktop (2-3
+// columnas) 15 se ve bien.
+const JUEGOS_POR_PAGINA_MOVIL = 8
+const JUEGOS_POR_PAGINA_DESKTOP = 15
+
+// Detecta si la pantalla es de tamaño "móvil" (menor al breakpoint sm
+// de Tailwind, 640px) y se actualiza si el usuario rota el teléfono o
+// cambia el tamaño de la ventana.
+function useEsMovil() {
+  const [esMovil, setEsMovil] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth < 640
+  )
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 639px)')
+    const actualizar = (e) => setEsMovil(e.matches)
+    mediaQuery.addEventListener('change', actualizar)
+    return () => mediaQuery.removeEventListener('change', actualizar)
+  }, [])
+
+  return esMovil
+}
 
 function App() {
   const [juegos, setJuegos] = useState([])
@@ -9,6 +31,10 @@ function App() {
   const [paginaActual, setPaginaActual] = useState(1)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
+  const esMovil = useEsMovil()
+  const juegosPorPagina = esMovil
+    ? JUEGOS_POR_PAGINA_MOVIL
+    : JUEGOS_POR_PAGINA_DESKTOP
 
   useEffect(() => {
     Promise.all([
@@ -31,18 +57,23 @@ function App() {
 
   const totalPaginas = Math.max(
     1,
-    Math.ceil(juegosFiltrados.length / JUEGOS_POR_PAGINA)
+    Math.ceil(juegosFiltrados.length / juegosPorPagina)
   )
   const juegosVisibles = juegosFiltrados.slice(
-    (paginaActual - 1) * JUEGOS_POR_PAGINA,
-    paginaActual * JUEGOS_POR_PAGINA
+    (paginaActual - 1) * juegosPorPagina,
+    paginaActual * juegosPorPagina
   )
 
-  // Al cambiar de categoría, siempre volvemos a la página 1.
+  // Al cambiar de categoría, o si cambia cuántos caben por página
+  // (ej. el usuario rota el teléfono), siempre volvemos a la página 1.
   const cambiarGenero = (genero) => {
     setGeneroActivo(genero)
     setPaginaActual(1)
   }
+
+  useEffect(() => {
+    setPaginaActual(1)
+  }, [juegosPorPagina])
 
   const irAPagina = (pagina) => {
     setPaginaActual(pagina)

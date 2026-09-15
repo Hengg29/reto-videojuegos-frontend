@@ -1,16 +1,18 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useEsMovil } from '../hooks/useEsMovil'
+import { useAuth } from '../context/AuthContext'
 import { Header } from '../components/Header'
 import { FiltroPill } from '../components/FiltroPill'
 import { TarjetaJuego } from '../components/TarjetaJuego'
 import { TarjetaSkeleton } from '../components/TarjetaSkeleton'
 import { Paginacion } from '../components/Paginacion'
-
+import { JuegoFormModal } from '../components/JuegoFormModal'
 
 const JUEGOS_POR_PAGINA_MOVIL = 8
 const JUEGOS_POR_PAGINA_DESKTOP = 15
 
 function Catalogo() {
+  const { esAdmin, token } = useAuth()
   const [juegos, setJuegos] = useState([])
   const [generos, setGeneros] = useState([])
   const [generoActivo, setGeneroActivo] = useState('todos')
@@ -22,19 +24,22 @@ function Catalogo() {
     ? JUEGOS_POR_PAGINA_MOVIL
     : JUEGOS_POR_PAGINA_DESKTOP
 
+  // Modal de crear/editar juego (solo lo usa el admin)
+  const [modalAbierto, setModalAbierto] = useState(false)
+  const [juegoEditando, setJuegoEditando] = useState(null)
+
+  const cargarJuegos = useCallback(() => {
+    return fetch('/api/juegos')
+      .then((res) => res.json())
+      .then(setJuegos)
+  }, [])
+
   // Al cargar la página, traemos los juegos y los géneros desde el backend.
   useEffect(() => {
-    Promise.all([
-      fetch('/api/juegos').then((res) => res.json()),
-      fetch('/api/generos').then((res) => res.json()),
-    ])
-      .then(([juegosData, generosData]) => {
-        setJuegos(juegosData)
-        setGeneros(generosData)
-      })
+    Promise.all([cargarJuegos(), fetch('/api/generos').then((res) => res.json()).then(setGeneros)])
       .catch(() => setError('No se pudo conectar con el backend'))
       .finally(() => setCargando(false))
-  }, [])
+  }, [cargarJuegos])
 
   // Filtra los juegos según el género seleccionado.
   const juegosFiltrados = useMemo(() => {
@@ -69,6 +74,39 @@ function Catalogo() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  // ---- Acciones de administrador ----
+
+  const abrirModalCrear = () => {
+    setJuegoEditando(null)
+    setModalAbierto(true)
+  }
+
+  const abrirModalEditar = (juego) => {
+    setJuegoEditando(juego)
+    setModalAbierto(true)
+  }
+
+  const eliminarJuego = async (juego) => {
+    const confirmado = window.confirm(
+      `¿Seguro que quieres eliminar "${juego.titulo}"? Esta acción no se puede deshacer.`
+    )
+    if (!confirmado) return
+
+    try {
+      const res = await fetch(`/api/juegos/${juego.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok && res.status !== 204) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || 'No se pudo eliminar el juego')
+      }
+      cargarJuegos()
+    } catch (err) {
+      alert(err.message)
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-neutral-950 text-neutral-100">
       <Header />
@@ -93,7 +131,7 @@ function Catalogo() {
 
         {/* Filtros por género */}
         <section
-          className="mb-12 flex flex-wrap justify-center gap-2"
+          className="mb-8 flex flex-wrap justify-center gap-2"
           role="group"
           aria-label="Filtrar juegos por género"
         >
@@ -114,12 +152,23 @@ function Catalogo() {
           ))}
         </section>
 
-        {/* Conteo de resultados */}
-        <p className="mb-8 text-center text-sm text-neutral-500">
-          {juegosFiltrados.length}{' '}
-          {juegosFiltrados.length === 1 ? 'resultado' : 'resultados'}
-          {generoActivo !== 'todos' && <> en «{generoActivo}»</>}
-        </p>
+        {/* Conteo de resultados + acción de admin */}
+        <div className="mb-8 flex items-center justify-center gap-4">
+          <p className="text-center text-sm text-neutral-500">
+            {juegosFiltrados.length}{' '}
+            {juegosFiltrados.length === 1 ? 'resultado' : 'resultados'}
+            {generoActivo !== 'todos' && <> en «{generoActivo}»</>}
+          </p>
+          {esAdmin && (
+            <button
+              type="button"
+              onClick={abrirModalCrear}
+              className="cursor-pointer rounded-md border border-neutral-700 px-3 py-1.5 text-xs font-medium text-neutral-200 transition-colors duration-150 hover:border-neutral-500 hover:text-white"
+            >
+              + Agregar juego
+            </button>
+          )}
+        </div>
 
         {/* Grid de juegos */}
         {cargando ? (
@@ -135,7 +184,12 @@ function Catalogo() {
         ) : (
           <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {juegosVisibles.map((juego) => (
-              <TarjetaJuego key={juego.id} juego={juego} />
+              <TarjetaJuego
+                key={juego.id}
+                juego={juego}
+                onEditar={esAdmin ? abrirModalEditar : undefined}
+                onEliminar={esAdmin ? eliminarJuego : undefined}
+              />
             ))}
           </section>
         )}
@@ -153,6 +207,14 @@ function Catalogo() {
       <footer className="border-t border-neutral-800 py-6 text-center text-sm text-neutral-500">
         Reto Videojuegos — Turing IA
       </footer>
+
+      <JuegoFormModal
+        abierto={modalAbierto}
+        juego={juegoEditando}
+        generos={generos}
+        onCerrar={() => setModalAbierto(false)}
+        onGuardado={cargarJuegos}
+      />
     </div>
   )
 }

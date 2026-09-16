@@ -22,11 +22,25 @@ si ese ya está ocupado).
 
 ## Conexión con el backend
 
-Las peticiones a `/api/...` se redirigen automáticamente al backend
-(`http://localhost:4000`) mediante el proxy configurado en
-[`vite.config.js`](vite.config.js). Esto evita problemas de CORS y permite
-usar rutas relativas (`fetch('/api/health')`) en vez de escribir la URL
-completa del backend en el código.
+La URL base del backend la resuelve [`src/config/api.js`](src/config/api.js)
+con la constante `API_URL`, y todos los `fetch()` del proyecto la usan
+(`fetch(\`${API_URL}/api/juegos\`)`) en vez de escribir rutas sueltas:
+
+- **En desarrollo**: `VITE_API_URL` no está definida, así que `API_URL`
+  queda vacía y las peticiones van a rutas relativas (`/api/...`), que
+  el proxy de [`vite.config.js`](vite.config.js) redirige a
+  `http://localhost:4000`. Esto evita problemas de CORS en local.
+- **En producción**: frontend y backend viven en dominios distintos
+  (no hay proxy posible), así que se define `VITE_API_URL` como
+  variable de entorno del build (ej. `https://backend.hazsoluciones.com`)
+  en la plataforma de hosting, y `API_URL` la toma de ahí. Vite la
+  incrusta en el código durante `npm run build` — cambiarla requiere
+  un build nuevo, no basta con guardarla.
+
+`config/api.js` también expone `urlImagen(ruta)`, que decide si una
+imagen debe cargarse desde el backend (`/uploads/...`, subidas por el
+admin) o servirse tal cual (`/images/...` del propio frontend, o una
+URL externa completa).
 
 ## Estructura del proyecto
 
@@ -35,27 +49,36 @@ frontend/
 ├── index.html
 ├── vite.config.js
 ├── public/
-│   └── images/           ← carátulas de los juegos
+│   └── images/           ← carátulas de los juegos de ejemplo
 └── src/
     ├── main.jsx           ← punto de entrada: BrowserRouter + AuthProvider
     ├── App.jsx            ← define las rutas (react-router-dom)
     ├── index.css          ← Tailwind + fuentes + tokens de color
+    ├── config/
+    │   └── api.js          ← URL base del backend (API_URL) + urlImagen()
     ├── context/
-    │   └── AuthContext.jsx ← sesión del usuario (login/logout, token)
+    │   └── AuthContext.jsx ← sesión del usuario (login/logout, token, toast)
     ├── hooks/
     │   └── useEsMovil.js   ← detecta si la pantalla es de tamaño móvil
     ├── pages/
     │   ├── Catalogo.jsx     ← ruta "/" — estado, lógica y catálogo
-    │   └── Login.jsx        ← ruta "/login" — formulario de acceso
+    │   ├── Login.jsx        ← ruta "/login" — formulario de acceso
+    │   └── Registro.jsx     ← ruta "/registro" — formulario de cuenta nueva
     └── components/
-        ├── Header.jsx        ← muestra "Iniciar sesión" o el usuario logueado
-        ├── FiltroPill.jsx
+        ├── Header.jsx              ← muestra "Iniciar sesión" o el usuario logueado
+        ├── UserMenu.jsx            ← menú del usuario logueado (dentro del Header)
+        ├── BuscadorJuegos.jsx      ← input de búsqueda + selector de orden por fecha
+        ├── FiltroGeneroDropdown.jsx ← filtro de género (multi-selección)
         ├── TarjetaJuego.jsx
         ├── TarjetaSkeleton.jsx
         ├── Paginacion.jsx
-        ├── LoginHero.jsx     ← panel de marca del login (imagen + specs)
+        ├── JuegoFormModal.jsx      ← modal de admin: crear/editar juego + subir imagen
+        ├── ConfirmModal.jsx        ← modal de confirmación genérico (eliminar, sobrescribir)
+        ├── Toast.jsx               ← aviso flotante (ej. "sesión expirada")
+        ├── LoginHero.jsx           ← panel de marca del login (imagen + specs)
         └── icons/
-            └── IconGamepad.jsx
+            ├── IconGamepad.jsx
+            └── IconUser.jsx
 ```
 
 La idea de esta separación (igual que en el backend con `routes/`/
@@ -84,8 +107,13 @@ panel de admin), creas su archivo en `pages/` y lo registras en
 - **Imágenes**: las portadas de los juegos vienen del campo `imagen_url`.
   Como admin, el modal de "Agregar/Editar juego" sube la imagen de
   verdad al backend (`POST /api/upload`), que le pone un nombre único
-  y la guarda en `backend/uploads/`; esa URL (`/uploads/<nombre-unico>.webp`)
-  queda proxyada por Vite igual que `/api` (ver `vite.config.js`).
-  Los 5 juegos de ejemplo usan carátulas guardadas a mano en
-  `public/images/` (proporción 2:3) — ambos esquemas de imagen
-  funcionan al mismo tiempo, ya que `imagen_url` es solo texto.
+  y la guarda en `backend/uploads/`, devolviendo una ruta relativa
+  (`/uploads/<nombre-unico>.webp`). El helper `urlImagen()` de
+  [`src/config/api.js`](src/config/api.js) decide cómo resolverla: en
+  desarrollo, esa ruta la proxya Vite igual que `/api` (ver
+  `vite.config.js`); en producción, se le antepone `API_URL` (la URL
+  pública del backend), porque frontend y backend ya no comparten
+  dominio. Los 5 juegos de ejemplo usan carátulas guardadas a mano en
+  `public/images/` (proporción 2:3), que `urlImagen()` deja tal cual
+  por no ser rutas `/uploads/...` — ambos esquemas de imagen funcionan
+  al mismo tiempo, ya que `imagen_url` es solo texto.

@@ -9,6 +9,7 @@ import { TarjetaSkeleton } from '../components/TarjetaSkeleton'
 import { Paginacion } from '../components/Paginacion'
 import { JuegoFormModal } from '../components/JuegoFormModal'
 import { ConfirmModal } from '../components/ConfirmModal'
+import { API_URL } from '../config/api'
 
 const JUEGOS_POR_PAGINA_MOVIL = 8
 const JUEGOS_POR_PAGINA_DESKTOP = 15
@@ -35,14 +36,14 @@ function Catalogo() {
   const [juegoAEliminar, setJuegoAEliminar] = useState(null)
 
   const cargarJuegos = useCallback(() => {
-    return fetch('/api/juegos')
+    return fetch(`${API_URL}/api/juegos`)
       .then((res) => res.json())
       .then(setJuegos)
   }, [])
 
   // Al cargar la página, traemos los juegos y los géneros desde el backend.
   useEffect(() => {
-    Promise.all([cargarJuegos(), fetch('/api/generos').then((res) => res.json()).then(setGeneros)])
+    Promise.all([cargarJuegos(), fetch(`${API_URL}/api/generos`).then((res) => res.json()).then(setGeneros)])
       .catch(() => setError('No se pudo conectar con el backend'))
       .finally(() => setCargando(false))
   }, [cargarJuegos])
@@ -115,7 +116,7 @@ function Catalogo() {
     setJuegoAEliminar(null)
 
     try {
-      const res = await fetch(`/api/juegos/${juego.id}`, {
+      const res = await fetch(`${API_URL}/api/juegos/${juego.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })

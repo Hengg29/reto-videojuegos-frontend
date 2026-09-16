@@ -1,4 +1,5 @@
 import { IconGamepad } from './icons/IconGamepad'
+import { urlImagen } from '../config/api'
 
 // Tarjeta individual de un juego.
 // onEditar/onEliminar solo se pasan cuando el usuario logueado es
@@ -15,10 +16,10 @@ export function TarjetaJuego({ juego, onEditar, onEliminar }) {
             <div
               aria-hidden="true"
               className="absolute inset-0 scale-110 bg-cover bg-center opacity-40 blur-2xl"
-              style={{ backgroundImage: `url(${juego.imagen_url})` }}
+              style={{ backgroundImage: `url(${urlImagen(juego.imagen_url)})` }}
             />
             <img
-              src={juego.imagen_url}
+              src={urlImagen(juego.imagen_url)}
               alt={`Portada de ${juego.titulo}`}
               loading="lazy"
               className="relative h-full w-full object-contain"

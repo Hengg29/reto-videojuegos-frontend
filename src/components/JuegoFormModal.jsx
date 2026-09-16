@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { ConfirmModal } from './ConfirmModal'
+import { API_URL, urlImagen } from '../config/api'
 
 const CLASIFICACIONES = [
   { id: 1, codigo: 'E', nombre: 'Para todos' },
@@ -78,7 +79,7 @@ export function JuegoFormModal({ abierto, juego, generos, onCerrar, onGuardado }
       const formData = new FormData()
       formData.append('imagen', archivo)
 
-      const res = await fetch('/api/upload', {
+      const res = await fetch(`${API_URL}/api/upload`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData, // sin Content-Type manual: el navegador pone el boundary correcto
@@ -127,7 +128,9 @@ export function JuegoFormModal({ abierto, juego, generos, onCerrar, onGuardado }
     setConfirmandoEdicion(false)
     setGuardando(true)
     try {
-      const url = esEdicion ? `/api/juegos/${juego.id}` : '/api/juegos'
+      const url = esEdicion
+        ? `${API_URL}/api/juegos/${juego.id}`
+        : `${API_URL}/api/juegos`
       const metodo = esEdicion ? 'PUT' : 'POST'
 
       const res = await fetch(url, {
@@ -197,7 +200,7 @@ export function JuegoFormModal({ abierto, juego, generos, onCerrar, onGuardado }
               <div className="flex h-20 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md border border-neutral-800 bg-neutral-900">
                 {archivoPreview || form.imagen_url ? (
                   <img
-                    src={archivoPreview || form.imagen_url}
+                    src={archivoPreview || urlImagen(form.imagen_url)}
                     alt="Vista previa"
                     className="h-full w-full object-cover"
                     onError={(e) => (e.currentTarget.style.display = 'none')}

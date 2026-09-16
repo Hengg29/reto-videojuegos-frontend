@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { IconGamepad } from '../components/icons/IconGamepad'
 import { LoginHero } from '../components/LoginHero'
 import { useAuth } from '../context/AuthContext'
+import { API_URL } from '../config/api'
 
 function Login() {
   const { login } = useAuth()
@@ -19,7 +20,7 @@ function Login() {
     setCargando(true)
 
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

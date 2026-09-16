@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { ConfirmModal } from './ConfirmModal'
 
 const CLASIFICACIONES = [
   { id: 1, codigo: 'E', nombre: 'Para todos' },
@@ -22,12 +23,13 @@ const FORM_VACIO = {
 // Modal para crear o editar un juego. Si `juego` viene con datos, es
 // modo edición (PUT); si viene null, es modo creación (POST).
 export function JuegoFormModal({ abierto, juego, generos, onCerrar, onGuardado }) {
-  const { token } = useAuth()
+  const { token, cerrarSesionPorExpiracion } = useAuth()
   const [form, setForm] = useState(FORM_VACIO)
   const [archivoPreview, setArchivoPreview] = useState(null)
   const [subiendoImagen, setSubiendoImagen] = useState(false)
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState(null)
+  const [confirmandoEdicion, setConfirmandoEdicion] = useState(false)
 
   const esEdicion = Boolean(juego)
 
@@ -81,6 +83,12 @@ export function JuegoFormModal({ abierto, juego, generos, onCerrar, onGuardado }
         headers: { Authorization: `Bearer ${token}` },
         body: formData, // sin Content-Type manual: el navegador pone el boundary correcto
       })
+
+      if (res.status === 401) {
+        cerrarSesionPorExpiracion()
+        return
+      }
+
       const data = await res.json()
 
       if (!res.ok) {
@@ -95,7 +103,11 @@ export function JuegoFormModal({ abierto, juego, generos, onCerrar, onGuardado }
     }
   }
 
-  const handleSubmit = async (e) => {
+  // Al enviar el formulario: si es una edición, primero pedimos
+  // confirmación (se está sobrescribiendo un juego que ya existía).
+  // Si es un juego nuevo, se guarda directo — crear no tiene el mismo
+  // riesgo que sobrescribir datos existentes.
+  const handleSubmit = (e) => {
     e.preventDefault()
     setError(null)
 
@@ -104,6 +116,15 @@ export function JuegoFormModal({ abierto, juego, generos, onCerrar, onGuardado }
       return
     }
 
+    if (esEdicion) {
+      setConfirmandoEdicion(true)
+    } else {
+      guardarJuego()
+    }
+  }
+
+  const guardarJuego = async () => {
+    setConfirmandoEdicion(false)
     setGuardando(true)
     try {
       const url = esEdicion ? `/api/juegos/${juego.id}` : '/api/juegos'
@@ -117,6 +138,12 @@ export function JuegoFormModal({ abierto, juego, generos, onCerrar, onGuardado }
         },
         body: JSON.stringify(form),
       })
+
+      if (res.status === 401) {
+        cerrarSesionPorExpiracion()
+        return
+      }
+
       const data = await res.json()
 
       if (!res.ok) {
@@ -335,6 +362,15 @@ export function JuegoFormModal({ abierto, juego, generos, onCerrar, onGuardado }
           </div>
         </form>
       </div>
+
+      <ConfirmModal
+        abierto={confirmandoEdicion}
+        titulo="Guardar cambios"
+        mensaje={`¿Seguro que quieres guardar los cambios en "${form.titulo}"?`}
+        textoConfirmar="Guardar"
+        onConfirmar={guardarJuego}
+        onCancelar={() => setConfirmandoEdicion(false)}
+      />
     </div>
   )
 }

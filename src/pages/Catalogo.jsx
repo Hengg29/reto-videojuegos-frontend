@@ -8,12 +8,13 @@ import { TarjetaJuego } from '../components/TarjetaJuego'
 import { TarjetaSkeleton } from '../components/TarjetaSkeleton'
 import { Paginacion } from '../components/Paginacion'
 import { JuegoFormModal } from '../components/JuegoFormModal'
+import { ConfirmModal } from '../components/ConfirmModal'
 
 const JUEGOS_POR_PAGINA_MOVIL = 8
 const JUEGOS_POR_PAGINA_DESKTOP = 15
 
 function Catalogo() {
-  const { esAdmin, token } = useAuth()
+  const { esAdmin, token, mostrarToast, cerrarSesionPorExpiracion } = useAuth()
   const [juegos, setJuegos] = useState([])
   const [generos, setGeneros] = useState([])
   const [generosSeleccionados, setGenerosSeleccionados] = useState([])
@@ -30,6 +31,8 @@ function Catalogo() {
   // Modal de crear/editar juego (solo lo usa el admin)
   const [modalAbierto, setModalAbierto] = useState(false)
   const [juegoEditando, setJuegoEditando] = useState(null)
+
+  const [juegoAEliminar, setJuegoAEliminar] = useState(null)
 
   const cargarJuegos = useCallback(() => {
     return fetch('/api/juegos')
@@ -101,24 +104,35 @@ function Catalogo() {
     setModalAbierto(true)
   }
 
-  const eliminarJuego = async (juego) => {
-    const confirmado = window.confirm(
-      `¿Seguro que quieres eliminar "${juego.titulo}"? Esta acción no se puede deshacer.`
-    )
-    if (!confirmado) return
+  // Solo abre el modal de confirmación — el borrado real pasa en
+  // confirmarEliminacion(), una vez que el usuario le da "Eliminar".
+  const pedirEliminar = (juego) => {
+    setJuegoAEliminar(juego)
+  }
+
+  const confirmarEliminacion = async () => {
+    const juego = juegoAEliminar
+    setJuegoAEliminar(null)
 
     try {
       const res = await fetch(`/api/juegos/${juego.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })
+
+      if (res.status === 401) {
+        cerrarSesionPorExpiracion()
+        return
+      }
       if (!res.ok && res.status !== 204) {
         const data = await res.json().catch(() => ({}))
         throw new Error(data.error || 'No se pudo eliminar el juego')
       }
+
+      mostrarToast(`"${juego.titulo}" fue eliminado.`)
       cargarJuegos()
     } catch (err) {
-      alert(err.message)
+      mostrarToast(err.message)
     }
   }
 
@@ -198,7 +212,7 @@ function Catalogo() {
                 key={juego.id}
                 juego={juego}
                 onEditar={esAdmin ? abrirModalEditar : undefined}
-                onEliminar={esAdmin ? eliminarJuego : undefined}
+                onEliminar={esAdmin ? pedirEliminar : undefined}
               />
             ))}
           </section>
@@ -224,6 +238,19 @@ function Catalogo() {
         generos={generos}
         onCerrar={() => setModalAbierto(false)}
         onGuardado={cargarJuegos}
+      />
+
+      <ConfirmModal
+        abierto={juegoAEliminar !== null}
+        titulo="Eliminar juego"
+        mensaje={
+          juegoAEliminar &&
+          `¿Seguro que quieres eliminar "${juegoAEliminar.titulo}"? Esta acción no se puede deshacer.`
+        }
+        textoConfirmar="Eliminar"
+        peligroso
+        onConfirmar={confirmarEliminacion}
+        onCancelar={() => setJuegoAEliminar(null)}
       />
     </div>
   )

@@ -1,10 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 
-// Clasificaciones fijas (coinciden con las filas de la tabla
-// `clasificaciones` en la base de datos). No hay endpoint para
-// traerlas todavía, así que por ahora viven aquí, del lado del
-// frontend.
 const CLASIFICACIONES = [
   { id: 1, codigo: 'E', nombre: 'Para todos' },
   { id: 2, codigo: 'T', nombre: 'Adolescentes' },
@@ -29,6 +25,7 @@ export function JuegoFormModal({ abierto, juego, generos, onCerrar, onGuardado }
   const { token } = useAuth()
   const [form, setForm] = useState(FORM_VACIO)
   const [archivoPreview, setArchivoPreview] = useState(null)
+  const [subiendoImagen, setSubiendoImagen] = useState(false)
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState(null)
 
@@ -67,15 +64,34 @@ export function JuegoFormModal({ abierto, juego, generos, onCerrar, onGuardado }
     setForm((f) => ({ ...f, [campo]: valor }))
   }
 
-  // Solo genera una vista previa local del archivo — no hay endpoint
-  // de subida de imágenes todavía. El archivo real hay que guardarlo
-  // en frontend/public/images/ y escribir su ruta abajo.
-  const handleArchivo = (e) => {
+  const handleArchivo = async (e) => {
     const archivo = e.target.files?.[0]
     if (!archivo) return
+
     setArchivoPreview(URL.createObjectURL(archivo))
-    if (!form.imagen_url) {
-      actualizarCampo('imagen_url', `/images/${archivo.name}`)
+    setError(null)
+    setSubiendoImagen(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('imagen', archivo)
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData, // sin Content-Type manual: el navegador pone el boundary correcto
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'No se pudo subir la imagen')
+      }
+
+      actualizarCampo('imagen_url', data.url)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSubiendoImagen(false)
     }
   }
 
@@ -168,21 +184,22 @@ export function JuegoFormModal({ abierto, juego, generos, onCerrar, onGuardado }
                   type="file"
                   accept="image/*"
                   onChange={handleArchivo}
-                  className="block w-full cursor-pointer text-xs text-neutral-400 file:mr-3 file:cursor-pointer file:rounded-md file:border file:border-neutral-800 file:bg-neutral-900 file:px-2.5 file:py-1.5 file:text-xs file:text-neutral-200 hover:file:border-neutral-600"
+                  disabled={subiendoImagen}
+                  className="block w-full cursor-pointer text-xs text-neutral-400 file:mr-3 file:cursor-pointer file:rounded-md file:border file:border-neutral-800 file:bg-neutral-900 file:px-2.5 file:py-1.5 file:text-xs file:text-neutral-200 hover:file:border-neutral-600 disabled:cursor-not-allowed disabled:opacity-60"
                 />
                 <input
                   type="text"
                   value={form.imagen_url}
                   onChange={(e) => actualizarCampo('imagen_url', e.target.value)}
-                  placeholder="/images/nombre-del-archivo.webp"
+                  placeholder="Se llena solo al subir una imagen"
                   className="w-full rounded-md border border-neutral-800 bg-neutral-900 px-2.5 py-1.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 />
               </div>
             </div>
             <p className="mt-1.5 text-xs text-neutral-500">
-              La vista previa es solo local. Guarda el archivo en{' '}
-              <code className="text-neutral-400">frontend/public/images/</code>{' '}
-              y confirma que la ruta de arriba sea correcta.
+              {subiendoImagen
+                ? 'Subiendo imagen...'
+                : 'La imagen se sube al servidor con un nombre único generado automáticamente. También puedes pegar una URL a mano en el campo de texto.'}
             </p>
           </div>
 

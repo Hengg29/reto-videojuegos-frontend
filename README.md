@@ -81,8 +81,11 @@ panel de admin), creas su archivo en `pages/` y lo registras en
 - **Tipografía**: [Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk)
   para títulos, [Inter](https://fonts.google.com/specimen/Inter) para
   texto — cargadas desde Google Fonts en `src/index.css`.
-- **Imágenes**: las portadas de los juegos vienen del campo `imagen_url` en
-  la base de datos. Las carátulas reales están guardadas en
-  `public/images/` (proporción 2:3) y la base de datos apunta a ellas
-  como `/images/archivo.webp`. Para agregar una nueva, guarda el archivo
-  ahí y actualiza `imagen_url` en MySQL con esa ruta.
+- **Imágenes**: las portadas de los juegos vienen del campo `imagen_url`.
+  Como admin, el modal de "Agregar/Editar juego" sube la imagen de
+  verdad al backend (`POST /api/upload`), que le pone un nombre único
+  y la guarda en `backend/uploads/`; esa URL (`/uploads/<nombre-unico>.webp`)
+  queda proxyada por Vite igual que `/api` (ver `vite.config.js`).
+  Los 5 juegos de ejemplo usan carátulas guardadas a mano en
+  `public/images/` (proporción 2:3) — ambos esquemas de imagen
+  funcionan al mismo tiempo, ya que `imagen_url` es solo texto.

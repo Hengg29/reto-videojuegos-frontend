@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useEsMovil } from '../hooks/useEsMovil'
 import { useAuth } from '../context/AuthContext'
 import { Header } from '../components/Header'
-import { FiltroPill } from '../components/FiltroPill'
+import { BuscadorJuegos } from '../components/BuscadorJuegos'
+import { FiltroGeneroDropdown } from '../components/FiltroGeneroDropdown'
 import { TarjetaJuego } from '../components/TarjetaJuego'
 import { TarjetaSkeleton } from '../components/TarjetaSkeleton'
 import { Paginacion } from '../components/Paginacion'
@@ -15,7 +16,9 @@ function Catalogo() {
   const { esAdmin, token } = useAuth()
   const [juegos, setJuegos] = useState([])
   const [generos, setGeneros] = useState([])
-  const [generoActivo, setGeneroActivo] = useState('todos')
+  const [generosSeleccionados, setGenerosSeleccionados] = useState([])
+  const [busqueda, setBusqueda] = useState('')
+  const [orden, setOrden] = useState('')
   const [paginaActual, setPaginaActual] = useState(1)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
@@ -41,11 +44,29 @@ function Catalogo() {
       .finally(() => setCargando(false))
   }, [cargarJuegos])
 
-  // Filtra los juegos según el género seleccionado.
+  // Filtra por género(s) + nombre, y ordena por fecha de lanzamiento.
   const juegosFiltrados = useMemo(() => {
-    if (generoActivo === 'todos') return juegos
-    return juegos.filter((j) => j.genero === generoActivo)
-  }, [juegos, generoActivo])
+    let resultado = juegos
+
+    if (generosSeleccionados.length > 0) {
+      resultado = resultado.filter((j) => generosSeleccionados.includes(j.genero))
+    }
+
+    if (busqueda.trim() !== '') {
+      const texto = busqueda.trim().toLowerCase()
+      resultado = resultado.filter((j) => j.titulo.toLowerCase().includes(texto))
+    }
+
+    if (orden === 'asc' || orden === 'desc') {
+      resultado = [...resultado].sort((a, b) => {
+        const fechaA = new Date(a.fecha_lanzamiento).getTime()
+        const fechaB = new Date(b.fecha_lanzamiento).getTime()
+        return orden === 'asc' ? fechaA - fechaB : fechaB - fechaA
+      })
+    }
+
+    return resultado
+  }, [juegos, generosSeleccionados, busqueda, orden])
 
   const totalPaginas = Math.max(
     1,
@@ -56,17 +77,11 @@ function Catalogo() {
     paginaActual * juegosPorPagina
   )
 
-  // Al cambiar de categoría, siempre volvemos a la página 1.
-  const cambiarGenero = (genero) => {
-    setGeneroActivo(genero)
-    setPaginaActual(1)
-  }
-
-  // Si cambia cuántos juegos caben por página (ej. el usuario rota el
-  // teléfono), también volvemos a la página 1.
+  // Si cambian los filtros/orden, o cuántos juegos caben por página
+  // (ej. el usuario rota el teléfono), siempre volvemos a la página 1.
   useEffect(() => {
     setPaginaActual(1)
-  }, [juegosPorPagina])
+  }, [juegosPorPagina, generosSeleccionados, busqueda, orden])
 
   const irAPagina = (pagina) => {
     setPaginaActual(pagina)
@@ -118,7 +133,8 @@ function Catalogo() {
             Catálogo de videojuegos
           </h1>
           <p className="mx-auto mt-3 max-w-md text-neutral-400">
-            Filtra por género y descubre nuevos títulos.
+            Busca por nombre, filtra por género y ordena por fecha de
+            lanzamiento.
           </p>
         </section>
 
@@ -129,35 +145,29 @@ function Catalogo() {
           </p>
         )}
 
-        {/* Filtros por género */}
-        <section
-          className="mb-8 flex flex-wrap justify-center gap-2"
-          role="group"
-          aria-label="Filtrar juegos por género"
-        >
-          <FiltroPill
-            activo={generoActivo === 'todos'}
-            onClick={() => cambiarGenero('todos')}
-          >
-            Todos
-          </FiltroPill>
-          {generos.map((g) => (
-            <FiltroPill
-              key={g.id}
-              activo={generoActivo === g.nombre}
-              onClick={() => cambiarGenero(g.nombre)}
-            >
-              {g.nombre}
-            </FiltroPill>
-          ))}
-        </section>
+        {/* Buscador + filtro de género (multi) + orden por fecha */}
+        <div className="mb-6 flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
+          <BuscadorJuegos
+            busqueda={busqueda}
+            onCambiarBusqueda={setBusqueda}
+            orden={orden}
+            onCambiarOrden={setOrden}
+          />
+          <FiltroGeneroDropdown
+            generos={generos}
+            seleccionados={generosSeleccionados}
+            onCambiar={setGenerosSeleccionados}
+          />
+        </div>
 
         {/* Conteo de resultados + acción de admin */}
         <div className="mb-8 flex items-center justify-center gap-4">
           <p className="text-center text-sm text-neutral-500">
             {juegosFiltrados.length}{' '}
             {juegosFiltrados.length === 1 ? 'resultado' : 'resultados'}
-            {generoActivo !== 'todos' && <> en «{generoActivo}»</>}
+            {generosSeleccionados.length > 0 && (
+              <> en «{generosSeleccionados.join(', ')}»</>
+            )}
           </p>
           {esAdmin && (
             <button
